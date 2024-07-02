@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::post('/tour-package/{slug}/booking', [BookingController::class, 'store']);
+Route::get('/bookings', [BookingController::class, 'getBookings'])->middleware('auth:sanctum');
