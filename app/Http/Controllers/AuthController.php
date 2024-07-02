@@ -6,7 +6,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class AuthController extends Controller
 {
@@ -17,14 +19,17 @@ class AuthController extends Controller
             if (!Auth::check()) {
                 return response()->json(['message' => 'Login to access this page.'], 401);
             }
-
+    
             // If authenticated, proceed to retrieve users
             $users = User::all();
-
+    
             return response()->json(['users' => $users], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Resource not found.'], 404);
+        } catch (QueryException $e) {
+            return response()->json(['message' => 'Database query error.'], 400);
         } catch (\Exception $e) {
-            // Handle any unexpected errors
-            return response()->json(['message' => 'Internal Server Error'], 500);
+            return response()->json(['message' => 'Unexpected error occurred.'], 500);
         }
     }
 
@@ -56,5 +61,12 @@ class AuthController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'Logged out successfully'], 200);
     }
 }
