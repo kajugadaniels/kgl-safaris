@@ -10,8 +10,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 Route::get('/users', [AuthController::class, 'getUsers'])->middleware('auth:sanctum');
 
-Route::get('/tour-packages', [TourPackageController::class, 'index']);
-Route::post('/tour-packages', [TourPackageController::class, 'store']);
-Route::get('/tour-package/{slug}', [TourPackageController::class, 'show']);
-Route::put('/tour-package/{slug}', [TourPackageController::class, 'update']);
-Route::delete('/tour-package/{slug}', [TourPackageController::class, 'destroy']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/tour-packages', [TourPackageController::class, 'index']);
+    Route::post('/tour-package', [TourPackageController::class, 'store']);
+    Route::get('/tour-package/{slug}', [TourPackageController::class, 'show']);
+    Route::put('/tour-package/{slug}', [TourPackageController::class, 'update']);
+    Route::delete('/tour-package/{slug}', [TourPackageController::class, 'destroy']);
+});
