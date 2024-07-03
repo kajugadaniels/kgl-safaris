@@ -7,8 +7,20 @@ use App\Models\TourPackage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Tag(name="TourPackages", description="API Endpoints for Tour Packages")
+ */
 class TourPackageController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/tour-packages",
+     *     summary="Get all tour packages",
+     *     tags={"TourPackages"},
+     *     @OA\Response(response=200, description="Successful retrieval of tour packages"),
+     *     @OA\Response(response=500, description="An error occurred while fetching tour packages")
+     * )
+     */
     public function index()
     {
         try {
@@ -19,6 +31,28 @@ class TourPackageController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/tour-package",
+     *     summary="Create a new tour package",
+     *     tags={"TourPackages"},
+     *     security={{ "bearer_token": {} }},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="title", type="string", example="Tour Package Title"),
+     *             @OA\Property(property="number_of_people", type="integer", example=10),
+     *             @OA\Property(property="price", type="number", format="float", example=100.50),
+     *             @OA\Property(property="days", type="integer", example=5),
+     *             @OA\Property(property="description", type="string", example="Description of the tour package"),
+     *             @OA\Property(property="image", type="string", format="binary", example="base64-encoded-image-data"),
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Tour package created successfully"),
+     *     @OA\Response(response=500, description="An error occurred while creating the tour package")
+     * )
+     */
     public function store(TourPackageRequest $request)
     {
         try {
@@ -45,6 +79,22 @@ class TourPackageController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/tour-package/{slug}",
+     *     summary="Get a tour package by slug",
+     *     tags={"TourPackages"},
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         required=true,
+     *         description="Slug of the tour package",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(response=200, description="Successful retrieval of tour package"),
+     *     @OA\Response(response=500, description="An error occurred while fetching the tour package")
+     * )
+     */
     public function show($slug)
     {
         try {
@@ -55,6 +105,35 @@ class TourPackageController extends Controller
         }
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/tour-package/{slug}",
+     *     summary="Update a tour package",
+     *     tags={"TourPackages"},
+     *     security={{ "bearer_token": {} }},
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         required=true,
+     *         description="Slug of the tour package",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="title", type="string", example="Updated Tour Package Title"),
+     *             @OA\Property(property="number_of_people", type="integer", example=15),
+     *             @OA\Property(property="price", type="number", format="float", example=120.75),
+     *             @OA\Property(property="days", type="integer", example=6),
+     *             @OA\Property(property="description", type="string", example="Updated description of the tour package"),
+     *             @OA\Property(property="image", type="string", format="binary", example="base64-encoded-image-data"),
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Tour package updated successfully"),
+     *     @OA\Response(response=500, description="An error occurred while updating the tour package")
+     * )
+     */
     public function update(TourPackageRequest $request, $slug)
     {
         try {
@@ -81,6 +160,23 @@ class TourPackageController extends Controller
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/tour-package/{slug}",
+     *     summary="Delete a tour package",
+     *     tags={"TourPackages"},
+     *     security={{ "bearer_token": {} }},
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         required=true,
+     *         description="Slug of the tour package",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(response=200, description="Tour package deleted successfully"),
+     *     @OA\Response(response=500, description="An error occurred while deleting the tour package")
+     * )
+     */
     public function destroy($slug)
     {
         try {

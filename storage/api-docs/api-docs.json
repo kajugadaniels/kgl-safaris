@@ -1,0 +1,400 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "My API",
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User login",
+                "operationId": "a3b306d14572d1f4bd6c064b3233e7b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User logout",
+                "operationId": "fe8f3429cd6979b3b4517e186505f9f9",
+                "responses": {
+                    "200": {
+                        "description": "Successful logout"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/users": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get all users",
+                "operationId": "0f6c0152f16491a4294967af62ded379",
+                "responses": {
+                    "200": {
+                        "description": "Successful retrieval of users"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/tour-package/{slug}/booking": {
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Create a booking for a tour package",
+                "operationId": "4805e0a5728aae313b9cac28fe5915a2",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug of the tour package",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-07-04"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Booking created successfully"
+                    },
+                    "500": {
+                        "description": "An error occurred while creating the booking"
+                    }
+                }
+            }
+        },
+        "/api/bookings": {
+            "get": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Get all bookings",
+                "operationId": "254c0262ad31938766c4da735ad7afbb",
+                "responses": {
+                    "200": {
+                        "description": "Successful retrieval of bookings"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Unexpected error occurred"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/tour-packages": {
+            "get": {
+                "tags": [
+                    "TourPackages"
+                ],
+                "summary": "Get all tour packages",
+                "operationId": "e635e24c98133cc1c11ba51da2d2e5e9",
+                "responses": {
+                    "200": {
+                        "description": "Successful retrieval of tour packages"
+                    },
+                    "500": {
+                        "description": "An error occurred while fetching tour packages"
+                    }
+                }
+            }
+        },
+        "/api/tour-package": {
+            "post": {
+                "tags": [
+                    "TourPackages"
+                ],
+                "summary": "Create a new tour package",
+                "operationId": "76d79cbf54ee77cbefbd4215d1f24698",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Tour Package Title"
+                                    },
+                                    "number_of_people": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100.5
+                                    },
+                                    "days": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Description of the tour package"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "example": "base64-encoded-image-data"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tour package created successfully"
+                    },
+                    "500": {
+                        "description": "An error occurred while creating the tour package"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/tour-package/{slug}": {
+            "get": {
+                "tags": [
+                    "TourPackages"
+                ],
+                "summary": "Get a tour package by slug",
+                "operationId": "321c5487696bc9161a01dd5e20c0cfc9",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug of the tour package",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful retrieval of tour package"
+                    },
+                    "500": {
+                        "description": "An error occurred while fetching the tour package"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "TourPackages"
+                ],
+                "summary": "Update a tour package",
+                "operationId": "5ecea998248bfacf921fd15150008573",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug of the tour package",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Updated Tour Package Title"
+                                    },
+                                    "number_of_people": {
+                                        "type": "integer",
+                                        "example": 15
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 120.75
+                                    },
+                                    "days": {
+                                        "type": "integer",
+                                        "example": 6
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated description of the tour package"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "example": "base64-encoded-image-data"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tour package updated successfully"
+                    },
+                    "500": {
+                        "description": "An error occurred while updating the tour package"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "TourPackages"
+                ],
+                "summary": "Delete a tour package",
+                "operationId": "77edb98311a0055df97a728e24520ab4",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug of the tour package",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tour package deleted successfully"
+                    },
+                    "500": {
+                        "description": "An error occurred while deleting the tour package"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Bookings",
+            "description": "API Endpoints for Bookings"
+        },
+        {
+            "name": "TourPackages",
+            "description": "API Endpoints for Tour Packages"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        }
+    ]
+}
