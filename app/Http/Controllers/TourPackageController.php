@@ -23,12 +23,9 @@ class TourPackageController extends Controller
      */
     public function index()
     {
-        try {
-            $tourPackages = TourPackage::all();
-            return response()->json(['tourPackages' => $tourPackages], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while fetching tour packages', 'error' => $e->getMessage()], 500);
-        }
+        $tourPackages = TourPackage::all();
+
+        return response()->json($tourPackages);
     }
 
     /**
