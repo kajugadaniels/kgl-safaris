@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tour_package_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('tour_package_id');
             $table->string('name');
             $table->string('email');
             $table->string('phone_number');
             $table->date('date');
             $table->timestamps();
+
+            // Index for tour_package_id
+            $table->index('tour_package_id');
         });
     }
 

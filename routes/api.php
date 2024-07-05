@@ -19,5 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/tour-package/{slug}', [TourPackageController::class, 'destroy']);
 });
 
-Route::post('/tour-package/{slug}/booking', [BookingController::class, 'store']);
+Route::post('/tour-package/{tourPackageId}/booking', [BookingController::class, 'store']);
 Route::get('/bookings', [BookingController::class, 'getBookings'])->middleware('auth:sanctum');

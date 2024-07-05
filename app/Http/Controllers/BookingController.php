@@ -41,10 +41,10 @@ class BookingController extends Controller
      *     @OA\Response(response=500, description="An error occurred while creating the booking")
      * )
      */
-    public function store(BookingRequest $request, $tourPackageSlug)
+    public function store(BookingRequest $request, $tourPackageId)
     {
         try {
-            $tourPackage = TourPackage::where('slug', $tourPackageSlug)->firstOrFail();
+            $tourPackage = TourPackage::findOrFail($tourPackageId);
 
             $booking = new Booking();
             $booking->tour_package_id = $tourPackage->id;
