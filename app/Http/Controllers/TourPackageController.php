@@ -97,6 +97,8 @@ class TourPackageController extends Controller
         try {
             $tourPackage = TourPackage::where('slug', $slug)->firstOrFail();
             return response()->json(['tourPackage' => $tourPackage], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Tour package not found'], 404);
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred while fetching the tour package', 'error' => $e->getMessage()], 500);
         }
