@@ -32,7 +32,7 @@ class AuthController extends Controller
      *     @OA\Response(response=422, description="Validation error")
      * )
      */
-    public function login(Request $request)
+        public function login(Request $request)
     {
         try {
             $request->validate([
@@ -54,7 +54,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'message' => 'Login successful',
-                'name' => $user,
+                'name' => $user->name, // Send only the user's name
                 'token' => $token,
             ], 200);
         } catch (ValidationException $e) {
