@@ -51,30 +51,42 @@ class TourPackageController extends Controller
      * )
      */
     public function store(TourPackageRequest $request)
-    {
-        try {
-            $tourPackage = new TourPackage();
-            $tourPackage->title = $request->title;
-            $tourPackage->slug = Str::slug($request->title);
-            $tourPackage->number_of_people = $request->number_of_people;
-            $tourPackage->price = $request->price;
-            $tourPackage->days = $request->days;
-            $tourPackage->description = $request->description;
+{
+    try {
+        $tourPackage = new TourPackage();
+        $tourPackage->title = $request->title;
+        $tourPackage->slug = Str::slug($request->title);
+        $tourPackage->number_of_people = $request->number_of_people;
+        $tourPackage->price = $request->price;
+        $tourPackage->days = $request->days;
+        $tourPackage->description = $request->description;
 
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $filename = Str::slug($request->title) . '-' . $request->price . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
-                $path = $image->storeAs('tour-packages', $filename, 'public');
-                $tourPackage->image = $path;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = Str::slug($request->title) . '-' . $request->price . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('tour-packages', $filename, 'public');
+
+            // Manually copy the image to the second directory
+            $storagePath = storage_path('app/public/tour-packages/' . $filename);
+            $publicPath = public_path('storage/tour-packages/' . $filename);
+
+            if (!file_exists(public_path('storage/tour-packages'))) {
+                mkdir(public_path('storage/tour-packages'), 0777, true);
             }
 
-            $tourPackage->save();
+            copy($storagePath, $publicPath);
 
-            return response()->json(['message' => 'Tour package created successfully', 'tourPackage' => $tourPackage], 201);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while creating the tour package', 'error' => $e->getMessage()], 500);
+            $tourPackage->image = $path;
         }
+
+        $tourPackage->save();
+
+        return response()->json(['message' => 'Tour package created successfully', 'tourPackage' => $tourPackage], 201);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'An error occurred while creating the tour package', 'error' => $e->getMessage()], 500);
     }
+}
+
 
     /**
      * @OA\Get(
@@ -148,6 +160,17 @@ class TourPackageController extends Controller
                 $image = $request->file('image');
                 $filename = Str::slug($request->title) . '-' . $request->price . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
                 $path = $image->storeAs('tour-packages', $filename, 'public');
+
+                // Manually copy the image to the second directory
+                $storagePath = storage_path('app/public/tour-packages/' . $filename);
+                $publicPath = public_path('storage/tour-packages/' . $filename);
+
+                if (!file_exists(public_path('storage/tour-packages'))) {
+                    mkdir(public_path('storage/tour-packages'), 0777, true);
+                }
+
+                copy($storagePath, $publicPath);
+
                 $tourPackage->image = $path;
             }
 
