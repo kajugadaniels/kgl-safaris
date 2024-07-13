@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TourPackageRequest;
 use App\Models\TourPackage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -50,43 +51,47 @@ class TourPackageController extends Controller
      *     @OA\Response(response=500, description="An error occurred while creating the tour package")
      * )
      */
-    public function store(TourPackageRequest $request)
-{
-    try {
-        $tourPackage = new TourPackage();
-        $tourPackage->title = $request->title;
-        $tourPackage->slug = Str::slug($request->title);
-        $tourPackage->number_of_people = $request->number_of_people;
-        $tourPackage->price = $request->price;
-        $tourPackage->days = $request->days;
-        $tourPackage->description = $request->description;
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'number_of_people' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'days' => 'required|integer|min:1',
+            'description' => 'required|string',
+        ]);
 
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = Str::slug($request->title) . '-' . $request->price . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('tour-packages', $filename, 'public');
+        try {
+            $tourPackage = new TourPackage();
+            $tourPackage->title = $request->title;
+            $tourPackage->slug = Str::slug($request->title);
+            $tourPackage->number_of_people = $request->number_of_people;
+            $tourPackage->price = $request->price;
+            $tourPackage->days = $request->days;
+            $tourPackage->description = $request->description;
 
-            // Manually copy the image to the second directory
-            $storagePath = storage_path('app/public/tour-packages/' . $filename);
-            $publicPath = public_path('storage/tour-packages/' . $filename);
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $filename = Str::slug($request->title) . '-' . $request->price . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
 
-            if (!file_exists(public_path('storage/tour-packages'))) {
-                mkdir(public_path('storage/tour-packages'), 0777, true);
+                // Save in storage/app/public/tour-packages
+                $path = $image->storeAs('public/tour-packages', $filename);
+
+                // Save in public/storage/tour-packages
+                $image->move(public_path('storage/tour-packages'), $filename);
+
+                // Save the path to the image in the database
+                $tourPackage->image = 'tour-packages/' . $filename;
             }
 
-            copy($storagePath, $publicPath);
+            $tourPackage->save();
 
-            $tourPackage->image = $path;
+            return response()->json(['message' => 'Tour package created successfully', 'tourPackage' => $tourPackage], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while creating the tour package', 'error' => $e->getMessage()], 500);
         }
-
-        $tourPackage->save();
-
-        return response()->json(['message' => 'Tour package created successfully', 'tourPackage' => $tourPackage], 201);
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'An error occurred while creating the tour package', 'error' => $e->getMessage()], 500);
     }
-}
-
 
     /**
      * @OA\Get(
