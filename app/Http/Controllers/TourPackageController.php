@@ -24,7 +24,7 @@ class TourPackageController extends Controller
      */
     public function index()
     {
-        $tourPackages = TourPackage::all();
+        $tourPackages = TourPackage::orderBy('id', 'desc')->get();
 
         return response()->json($tourPackages);
     }
