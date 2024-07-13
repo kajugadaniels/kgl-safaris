@@ -105,4 +105,9 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unexpected error occurred.'], 500);
         }
     }
+
+    public function checkAuth()
+    {
+        return response()->json(['message' => 'Authenticated'], 200);
+    }
 }

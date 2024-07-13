@@ -8,6 +8,7 @@ use App\Http\Controllers\TourPackageController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->get('/check-auth', [AuthController::class, 'checkAuth']);
 
 Route::get('/users', [AuthController::class, 'getUsers'])->middleware('auth:sanctum');
 
