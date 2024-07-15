@@ -73,20 +73,8 @@ class BookingController extends Controller
     */
     public function getBookings()
     {
-        try {
-            if (!Auth::check()) {
-                return response()->json(['message' => 'Login to access this page.'], 401);
-            }
+        $bookings = Booking::orderBy('id', 'desc')->get();
 
-            $bookings = Booking::all();
-
-            return response()->json(['bookings' => $bookings], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Resource not found.'], 404);
-        } catch (QueryException $e) {
-            return response()->json(['message' => 'Database query error.'], 400);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Unexpected error occurred.'], 500);
-        }
+        return response()->json($bookings);
     }
 }

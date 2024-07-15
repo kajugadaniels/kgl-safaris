@@ -20,4 +20,4 @@ Route::put('/tour-package/{slug}', [TourPackageController::class, 'update']);
 Route::delete('/tour-package/{slug}', [TourPackageController::class, 'destroy']);
 
 Route::post('/tour-package/{tourPackageId}/booking', [BookingController::class, 'store']);
-Route::get('/bookings', [BookingController::class, 'getBookings'])->middleware('auth:sanctum');
+Route::get('/bookings', [BookingController::class, 'getBookings']);
