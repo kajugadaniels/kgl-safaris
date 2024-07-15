@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\TourPackageRequest;
 use App\Models\TourPackage;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\TourPackageRequest;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * @OA\Tag(name="TourPackages", description="API Endpoints for Tour Packages")
@@ -150,41 +151,49 @@ class TourPackageController extends Controller
      *     @OA\Response(response=500, description="An error occurred while updating the tour package")
      * )
      */
-    public function update(TourPackageRequest $request, $slug)
+    public function update(Request $request, $id)
     {
-        try {
-            $tourPackage = TourPackage::where('slug', $slug)->firstOrFail();
-            $tourPackage->title = $request->title ?? $tourPackage->title;
-            $tourPackage->slug = $request->title ? Str::slug($request->title) : $tourPackage->slug;
-            $tourPackage->number_of_people = $request->number_of_people ?? $tourPackage->number_of_people;
-            $tourPackage->price = $request->price ?? $tourPackage->price;
-            $tourPackage->days = $request->days ?? $tourPackage->days;
-            $tourPackage->description = $request->description ?? $tourPackage->description;
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|required|string|max:255',
+            'number_of_people' => 'sometimes|required|integer',
+            'price' => 'sometimes|required|numeric',
+            'days' => 'sometimes|required|integer',
+            'description' => 'sometimes|required|string',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $filename = Str::slug($request->title) . '-' . $request->price . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
-                $path = $image->storeAs('tour-packages', $filename, 'public');
-
-                // Manually copy the image to the second directory
-                $storagePath = storage_path('app/public/tour-packages/' . $filename);
-                $publicPath = public_path('storage/tour-packages/' . $filename);
-
-                if (!file_exists(public_path('storage/tour-packages'))) {
-                    mkdir(public_path('storage/tour-packages'), 0777, true);
-                }
-
-                copy($storagePath, $publicPath);
-
-                $tourPackage->image = $path;
-            }
-
-            $tourPackage->save();
-
-            return response()->json(['message' => 'Tour package updated successfully', 'tourPackage' => $tourPackage], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while updating the tour package', 'error' => $e->getMessage()], 500);
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Validation Error', 'errors' => $validator->errors()], 400);
         }
+
+        $tourPackage = TourPackage::find($id);
+
+        if (is_null($tourPackage)) {
+            return response()->json(['message' => 'Tour Package not found'], 404);
+        }
+
+        // Update tour package attributes
+        $tourPackage->title = $request->input('title', $tourPackage->title);
+        $tourPackage->slug = $request->has('title') ? Str::slug($request->input('title')) : $tourPackage->slug;
+        $tourPackage->number_of_people = $request->input('number_of_people', $tourPackage->number_of_people);
+        $tourPackage->price = $request->input('price', $tourPackage->price);
+        $tourPackage->days = $request->input('days', $tourPackage->days);
+        $tourPackage->description = $request->input('description', $tourPackage->description);
+
+        // Handle image upload if provided
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = Str::slug($request->input('title')) . '-' . $request->input('price') . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('tour-packages', $filename, 'public');
+
+            // Update image path
+            $tourPackage->image = $path;
+        }
+
+        // Save tour package changes
+        $tourPackage->save();
+
+        return response()->json(['message' => 'Tour package updated successfully', 'tourPackage' => $tourPackage], 200);
     }
 
     /**
