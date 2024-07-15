@@ -9,20 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\TourPackageRequest;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * @OA\Tag(name="TourPackages", description="API Endpoints for Tour Packages")
- */
 class TourPackageController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/tour-packages",
-     *     summary="Get all tour packages",
-     *     tags={"TourPackages"},
-     *     @OA\Response(response=200, description="Successful retrieval of tour packages"),
-     *     @OA\Response(response=500, description="An error occurred while fetching tour packages")
-     * )
-     */
     public function index()
     {
         $tourPackages = TourPackage::orderBy('id', 'desc')->get();
@@ -30,28 +18,6 @@ class TourPackageController extends Controller
         return response()->json($tourPackages);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/tour-package",
-     *     summary="Create a new tour package",
-     *     tags={"TourPackages"},
-     *     security={{ "bearer_token": {} }},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="title", type="string", example="Tour Package Title"),
-     *             @OA\Property(property="number_of_people", type="integer", example=10),
-     *             @OA\Property(property="price", type="number", format="float", example=100.50),
-     *             @OA\Property(property="days", type="integer", example=5),
-     *             @OA\Property(property="description", type="string", example="Description of the tour package"),
-     *             @OA\Property(property="image", type="string", format="binary", example="base64-encoded-image-data"),
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Tour package created successfully"),
-     *     @OA\Response(response=500, description="An error occurred while creating the tour package")
-     * )
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -94,22 +60,6 @@ class TourPackageController extends Controller
         }
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/tour-package/{slug}",
-     *     summary="Get a tour package by slug",
-     *     tags={"TourPackages"},
-     *     @OA\Parameter(
-     *         name="slug",
-     *         in="path",
-     *         required=true,
-     *         description="Slug of the tour package",
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Response(response=200, description="Successful retrieval of tour package"),
-     *     @OA\Response(response=500, description="An error occurred while fetching the tour package")
-     * )
-     */
     public function show($slug)
     {
         try {
@@ -122,42 +72,13 @@ class TourPackageController extends Controller
         }
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/tour-package/{slug}",
-     *     summary="Update a tour package",
-     *     tags={"TourPackages"},
-     *     security={{ "bearer_token": {} }},
-     *     @OA\Parameter(
-     *         name="slug",
-     *         in="path",
-     *         required=true,
-     *         description="Slug of the tour package",
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="title", type="string", example="Updated Tour Package Title"),
-     *             @OA\Property(property="number_of_people", type="integer", example=15),
-     *             @OA\Property(property="price", type="number", format="float", example=120.75),
-     *             @OA\Property(property="days", type="integer", example=6),
-     *             @OA\Property(property="description", type="string", example="Updated description of the tour package"),
-     *             @OA\Property(property="image", type="string", format="binary", example="base64-encoded-image-data"),
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Tour package updated successfully"),
-     *     @OA\Response(response=500, description="An error occurred while updating the tour package")
-     * )
-     */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|required|string|max:255',
-            'number_of_people' => 'sometimes|required|integer',
-            'price' => 'sometimes|required|numeric',
-            'days' => 'sometimes|required|integer',
+            'number_of_people' => 'sometimes|required|integer|min:1',
+            'price' => 'sometimes|required|numeric|min:0',
+            'days' => 'sometimes|required|integer|min:1',
             'description' => 'sometimes|required|string',
             'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -174,7 +95,7 @@ class TourPackageController extends Controller
 
         // Update tour package attributes
         $tourPackage->title = $request->input('title', $tourPackage->title);
-        $tourPackage->slug = $request->has('title') ? Str::slug($request->input('title')) : $tourPackage->slug;
+        $tourPackage->slug = Str::slug($request->input('title', $tourPackage->title));
         $tourPackage->number_of_people = $request->input('number_of_people', $tourPackage->number_of_people);
         $tourPackage->price = $request->input('price', $tourPackage->price);
         $tourPackage->days = $request->input('days', $tourPackage->days);
@@ -183,7 +104,7 @@ class TourPackageController extends Controller
         // Handle image upload if provided
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $filename = Str::slug($request->input('title')) . '-' . $request->input('price') . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
+            $filename = Str::slug($tourPackage->title) . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('tour-packages', $filename, 'public');
 
             // Update image path
@@ -196,23 +117,6 @@ class TourPackageController extends Controller
         return response()->json(['message' => 'Tour package updated successfully', 'tourPackage' => $tourPackage], 200);
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/tour-package/{slug}",
-     *     summary="Delete a tour package",
-     *     tags={"TourPackages"},
-     *     security={{ "bearer_token": {} }},
-     *     @OA\Parameter(
-     *         name="slug",
-     *         in="path",
-     *         required=true,
-     *         description="Slug of the tour package",
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Response(response=200, description="Tour package deleted successfully"),
-     *     @OA\Response(response=500, description="An error occurred while deleting the tour package")
-     * )
-     */
     public function destroy($slug)
     {
         try {
