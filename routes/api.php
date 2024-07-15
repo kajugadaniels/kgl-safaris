@@ -21,10 +21,4 @@ Route::put('/tour-package/{slug}', [TourPackageController::class, 'update']);
 Route::delete('/tour-package/{slug}', [TourPackageController::class, 'destroy']);
 
 Route::post('/tour-package/{tourPackageId}/booking', [BookingController::class, 'store']);
-Route::get('/bookings', [BookingController::class, 'getBookings'])->middleware('auth:sanctum');
-
-
-Route::middleware([CorsMiddleware::class])->group(function () {
-    Route::get('/example', [ExampleController::class, 'method']);
-    // other API routes
-});
+Route::get('/bookings', [BookingController::class, 'getBookings']);
