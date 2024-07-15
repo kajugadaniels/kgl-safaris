@@ -60,18 +60,6 @@ class TourPackageController extends Controller
         }
     }
 
-    public function show($slug)
-    {
-        try {
-            $tourPackage = TourPackage::where('slug', $slug)->firstOrFail();
-            return response()->json(['tourPackage' => $tourPackage], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['message' => 'Tour package not found'], 404);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while fetching the tour package', 'error' => $e->getMessage()], 500);
-        }
-    }
-
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -80,7 +68,7 @@ class TourPackageController extends Controller
             'price' => 'sometimes|required|numeric|min:0',
             'days' => 'sometimes|required|integer|min:1',
             'description' => 'sometimes|required|string',
-            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -93,28 +81,46 @@ class TourPackageController extends Controller
             return response()->json(['message' => 'Tour Package not found'], 404);
         }
 
-        // Update tour package attributes
-        $tourPackage->title = $request->input('title', $tourPackage->title);
-        $tourPackage->slug = Str::slug($request->input('title', $tourPackage->title));
-        $tourPackage->number_of_people = $request->input('number_of_people', $tourPackage->number_of_people);
-        $tourPackage->price = $request->input('price', $tourPackage->price);
-        $tourPackage->days = $request->input('days', $tourPackage->days);
-        $tourPackage->description = $request->input('description', $tourPackage->description);
+        try {
+            // Update tour package attributes
+            $tourPackage->title = $request->input('title', $tourPackage->title);
+            $tourPackage->slug = Str::slug($request->input('title', $tourPackage->title));
+            $tourPackage->number_of_people = $request->input('number_of_people', $tourPackage->number_of_people);
+            $tourPackage->price = $request->input('price', $tourPackage->price);
+            $tourPackage->days = $request->input('days', $tourPackage->days);
+            $tourPackage->description = $request->input('description', $tourPackage->description);
 
-        // Handle image upload if provided
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = Str::slug($tourPackage->title) . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('tour-packages', $filename, 'public');
+            // Handle image upload if provided
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $filename = Str::slug($tourPackage->title) . '-' . $tourPackage->price . '-' . now()->timestamp . '.' . $image->getClientOriginalExtension();
 
-            // Update image path
-            $tourPackage->image = $path;
+                // Save in storage/app/public/tour-packages
+                $path = $image->storeAs('public/tour-packages', $filename);
+
+                // Save in public/storage/tour-packages
+                $image->move(public_path('storage/tour-packages'), $filename);
+
+                // Delete old image if exists
+                if ($tourPackage->image) {
+                    $oldImagePath = public_path('storage/' . $tourPackage->image);
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                    Storage::delete('public/' . $tourPackage->image);
+                }
+
+                // Update image path in the database
+                $tourPackage->image = 'tour-packages/' . $filename;
+            }
+
+            // Save tour package changes
+            $tourPackage->save();
+
+            return response()->json(['message' => 'Tour package updated successfully', 'tourPackage' => $tourPackage], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while updating the tour package', 'error' => $e->getMessage()], 500);
         }
-
-        // Save tour package changes
-        $tourPackage->save();
-
-        return response()->json(['message' => 'Tour package updated successfully', 'tourPackage' => $tourPackage], 200);
     }
 
     public function destroy($slug)
