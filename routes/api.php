@@ -17,7 +17,7 @@ Route::get('/tour-packages', [TourPackageController::class, 'index']);
 Route::get('/tour-package/{slug}', [TourPackageController::class, 'show']);
 
 Route::post('/tour-package', [TourPackageController::class, 'store']);
-Route::put('/tour-package/{slug}', [TourPackageController::class, 'update']);
+Route::put('/tour-package/{id}', [TourPackageController::class, 'update']);
 Route::delete('/tour-package/{slug}', [TourPackageController::class, 'destroy']);
 
 Route::post('/tour-package/{tourPackageId}/booking', [BookingController::class, 'store']);
