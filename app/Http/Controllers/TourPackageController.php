@@ -18,6 +18,17 @@ class TourPackageController extends Controller
         return response()->json($tourPackages);
     }
 
+    public function show($slug)
+    {
+        try {
+            $tourPackage = TourPackage::where('slug', $slug)->firstOrFail();
+
+            return response()->json($tourPackage, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Tour package not found', 'error' => $e->getMessage()], 404);
+        }
+    }
+
     public function store(Request $request)
     {
         $request->validate([
